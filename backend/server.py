@@ -236,6 +236,10 @@ async def seed_data():
             ],
             "status": "active",
             "seller_email": "builder@example.com",
+            "seller_name": "TechBuilder Studio",
+            "seller_products": 3,
+            "is_featured": True,
+            "is_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         },
         {
