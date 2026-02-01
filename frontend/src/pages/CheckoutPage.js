@@ -9,20 +9,22 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export const CheckoutPage = () => {
-  const { id } = useParams();
+  const params = useParams();
   const [listing, setListing] = useState(null);
   const [currency, setCurrency] = useState('USD');
   const [loading, setLoading] = useState(true);
+  
+  const listingId = params.id;
 
   useEffect(() => {
     const userLocale = navigator.language || navigator.userLanguage;
-    if (userLocale.toLowerCase().includes('in')) {
+    if (userLocale && userLocale.toLowerCase().includes('in')) {
       setCurrency('INR');
     }
 
-    const fetchListing = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/listings/${id}`);
+        const response = await axios.get(`${API}/listings/${listingId}`);
         setListing(response.data);
       } catch (error) {
         console.error('Error fetching listing:', error);
@@ -31,10 +33,12 @@ export const CheckoutPage = () => {
       }
     };
 
-    fetchListing();
-  }, [id]);
+    if (listingId) {
+      fetchData();
+    }
+  }, [listingId]);
 
-  const formatPrice = () => {
+  const getFormattedPrice = () => {
     if (!listing) return '';
     if (currency === 'INR') {
       return `₹${listing.price_inr.toLocaleString()}`;
@@ -73,11 +77,13 @@ export const CheckoutPage = () => {
   }
 
   const commission = calculateCommission();
+  const imageList = listing.images || [];
+  const firstImage = imageList.length > 0 ? imageList[0] : '';
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link to={`/listing/${id}`}>
+        <Link to={`/listing/${listingId}`}>
           <Button variant="ghost" className="mb-6" data-testid="back-to-listing">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Listing
@@ -92,16 +98,18 @@ export const CheckoutPage = () => {
               <CardContent className="p-6">
                 <h2 className="text-xl font-bold mb-4">Order Summary</h2>
                 <div className="flex gap-4">
-                  <img
-                    src={listing.images[0]}
-                    alt={listing.title}
-                    className="w-24 h-24 object-cover rounded-lg"
-                  />
+                  {firstImage && (
+                    <img
+                      src={firstImage}
+                      alt={listing.title}
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                  )}
                   <div>
                     <h3 className="font-semibold text-lg" data-testid="checkout-listing-title">{listing.title}</h3>
                     <p className="text-gray-600 text-sm">{listing.category}</p>
                     <p className="text-avocado-dark font-bold text-xl mt-2" data-testid="checkout-price">
-                      {formatPrice()}
+                      {getFormattedPrice()}
                     </p>
                   </div>
                 </div>
@@ -165,7 +173,7 @@ export const CheckoutPage = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between mb-2">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">{formatPrice()}</span>
+                    <span className="font-medium">{getFormattedPrice()}</span>
                   </div>
                   <div className="flex justify-between mb-4">
                     <span className="text-gray-600 text-sm">Seller receives</span>
@@ -175,7 +183,7 @@ export const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-4">
                     <span>Total</span>
-                    <span className="text-avocado-dark">{formatPrice()}</span>
+                    <span className="text-avocado-dark">{getFormattedPrice()}</span>
                   </div>
                 </div>
 
