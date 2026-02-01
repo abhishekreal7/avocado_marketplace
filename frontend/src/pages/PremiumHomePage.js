@@ -305,11 +305,26 @@ export const PremiumHomePage = () => {
               <motion.div
                 key={listing.id}
                 variants={fadeInUp}
-                whileHover={{ y: -8 }}
+                whileHover={{ 
+                  y: -12,
+                  transition: { type: "spring", stiffness: 300, damping: 20 }
+                }}
                 data-testid={`featured-listing-${listing.id}`}
               >
                 <Link to={`/listing/${listing.id}`}>
-                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white rounded-3xl">
+                  <motion.div
+                    whileHover={{
+                      boxShadow: "0 25px 50px -12px rgba(15, 57, 43, 0.25)"
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white rounded-3xl relative">
+                      {/* Hover glow effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-br from-avocado-light/10 to-avocado-forest/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        initial={{ scale: 0.8 }}
+                        whileHover={{ scale: 1 }}
+                      />
                     {/* Image with Zoom Effect */}
                     <div className="relative h-64 overflow-hidden bg-gray-100">
                       <motion.img
