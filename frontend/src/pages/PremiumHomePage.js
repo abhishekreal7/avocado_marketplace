@@ -450,7 +450,8 @@ export const PremiumHomePage = () => {
                         </motion.div>
                       </div>
                     </CardContent>
-                  </Card>
+                    </Card>
+                  </motion.div>
                 </Link>
               </motion.div>
             ))}
