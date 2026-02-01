@@ -252,7 +252,7 @@ export const HomePage = () => {
             Have an AI Website to Sell?
           </h2>
           <p className="text-avocado-light text-lg mb-8">
-            Apply to become a seller on Avocado. Sellers keep 85% of every sale.
+            Join our marketplace and monetize your AI projects. Reach thousands of potential buyers.
           </p>
           <Link to="/sell">
             <Button
@@ -264,28 +264,6 @@ export const HomePage = () => {
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </Link>
-
-          <div className="mt-12 bg-white/10 backdrop-blur-sm rounded-xl p-6">
-            <h3 className="font-semibold text-lg mb-4 text-avocado-light">Commission Model</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-3xl font-bold text-avocado-light">85%</p>
-                <p className="text-sm text-gray-300">Seller Earnings</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-avocado-light">15%</p>
-                <p className="text-sm text-gray-300">Platform Fee</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-avocado-light">100%</p>
-                <p className="text-sm text-gray-300">Transparency</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-300 mt-4">
-              Example: Website sold for {currency === 'INR' ? '₹10,000' : '$130'} → 
-              Seller earns {currency === 'INR' ? '₹8,500' : '$110.50'}, Platform earns {currency === 'INR' ? '₹1,500' : '$19.50'}
-            </p>
-          </div>
         </div>
       </section>
     </div>
