@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { Sparkles, ShieldCheck, Zap, TrendingUp, ArrowRight, Code2, Star, Check, Users, Award, Clock, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { FloatingAvocadoOrb } from '@/components/FloatingAvocadoOrb';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import axios from 'axios';
 import { useCurrency } from '@/hooks/useCurrency';
 
