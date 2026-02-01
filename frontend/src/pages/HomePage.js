@@ -125,9 +125,9 @@ export const HomePage = () => {
                 <div className="w-12 h-12 rounded-full bg-avocado-light text-avocado-dark flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   4
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Launch & Earn</h3>
+                <h3 className="font-semibold text-lg mb-2">Launch & Grow</h3>
                 <p className="text-gray-600 text-sm">
-                  Sellers earn 85%, Avocado takes 15% commission
+                  Deploy your website and start generating revenue immediately
                 </p>
               </CardContent>
             </Card>
