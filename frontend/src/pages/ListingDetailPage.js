@@ -37,17 +37,6 @@ export const ListingDetailPage = () => {
     fetchListing();
   }, [id]);
 
-  const fetchListing = async () => {
-    try {
-      const response = await axios.get(`${API}/listings/${id}`);
-      setListing(response.data);
-    } catch (error) {
-      console.error('Error fetching listing:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const formatPrice = () => {
     if (!listing) return '';
     if (currency === 'INR') {
