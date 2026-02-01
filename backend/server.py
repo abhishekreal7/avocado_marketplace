@@ -221,6 +221,41 @@ async def toggle_featured(listing_id: str):
     
     return {"message": "Featured status updated", "is_featured": new_featured_status}
 
+@api_router.post("/purchases", response_model=Purchase)
+async def create_purchase(purchase_data: PurchaseCreate):
+    # Get listing details
+    listing = await db.listings.find_one({"id": purchase_data.listing_id}, {"_id": 0})
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+    
+    # Determine price based on currency
+    price_paid = listing['price_usd'] if purchase_data.currency == 'USD' else listing['price_inr']
+    
+    purchase = Purchase(
+        buyer_email=purchase_data.buyer_email,
+        listing_id=purchase_data.listing_id,
+        listing_title=listing['title'],
+        price_paid=price_paid,
+        currency=purchase_data.currency
+    )
+    
+    doc = purchase.model_dump()
+    doc['purchase_date'] = doc['purchase_date'].isoformat()
+    
+    await db.purchases.insert_one(doc)
+    
+    return purchase
+
+@api_router.get("/admin/purchases", response_model=List[Purchase])
+async def get_purchases():
+    purchases = await db.purchases.find({}, {"_id": 0}).sort("purchase_date", -1).to_list(1000)
+    
+    for purchase in purchases:
+        if isinstance(purchase.get('purchase_date'), str):
+            purchase['purchase_date'] = datetime.fromisoformat(purchase['purchase_date'])
+    
+    return purchases
+
 @api_router.get("/seed")
 async def seed_data():
     # Clear existing data
