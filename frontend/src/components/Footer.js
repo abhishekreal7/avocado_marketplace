@@ -42,9 +42,8 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4 text-avocado-light">About</h3>
             <ul className="space-y-2 text-sm">
-              <li className="text-gray-300">Commission: 15%</li>
-              <li className="text-gray-300">Sellers keep 85%</li>
               <li className="text-gray-300">Curated quality</li>
+              <li className="text-gray-300">Instant delivery</li>
               <li className="text-gray-300">Secure payments</li>
             </ul>
           </div>
