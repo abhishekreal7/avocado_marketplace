@@ -27,9 +27,15 @@ const staggerContainer = {
 export const PremiumHomePage = () => {
   const [featuredListings, setFeaturedListings] = useState([]);
   const { formatPrice } = useCurrency();
-  const { scrollY } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
+  
+  // Parallax effects with smooth spring physics
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+  const heroY = useSpring(useTransform(scrollY, [0, 500], [0, 150]), { stiffness: 100, damping: 30 });
+  
+  // Background gradient transitions
+  const backgroundOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
 
   useEffect(() => {
     const fetchFeaturedListings = async () => {
