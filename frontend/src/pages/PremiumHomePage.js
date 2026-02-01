@@ -228,9 +228,12 @@ export const PremiumHomePage = () => {
 
       {/* Social Proof Stats Section */}
       <motion.section 
-        className="py-20 bg-gray-50 border-y border-gray-200"
+        className="py-20 bg-gray-50 border-y border-gray-200 relative"
         {...fadeInUp}
       >
+        {/* Gradient divider */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-avocado-forest/30 to-transparent" />
+        
         <div className="max-w-6xl mx-auto px-6">
           <motion.div 
             className="grid grid-cols-2 md:grid-cols-4 gap-8"
