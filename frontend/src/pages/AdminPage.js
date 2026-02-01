@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, XCircle, Clock, TrendingUp } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, TrendingUp, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,23 +19,28 @@ const API = `${BACKEND_URL}/api`;
 
 export const AdminPage = () => {
   const [submissions, setSubmissions] = useState([]);
+  const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('pending');
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/admin/submissions`);
-        setSubmissions(response.data);
+        const [submissionsRes, purchasesRes] = await Promise.all([
+          axios.get(`${API}/admin/submissions`),
+          axios.get(`${API}/admin/purchases`)
+        ]);
+        setSubmissions(submissionsRes.data);
+        setPurchases(purchasesRes.data);
       } catch (error) {
-        console.error('Error fetching submissions:', error);
-        toast.error('Failed to fetch submissions');
+        console.error('Error fetching data:', error);
+        toast.error('Failed to fetch data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSubmissions();
+    fetchData();
   }, []);
 
   const updateSubmissionStatus = async (id, status) => {
