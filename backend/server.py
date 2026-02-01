@@ -265,6 +265,10 @@ async def seed_data():
             ],
             "status": "active",
             "seller_email": "realtor@example.com",
+            "seller_name": "PropTech Solutions",
+            "seller_products": 2,
+            "is_featured": False,
+            "is_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         },
         {
@@ -290,6 +294,10 @@ async def seed_data():
             ],
             "status": "active",
             "seller_email": "marketer@example.com",
+            "seller_name": "Digital Marketing Co",
+            "seller_products": 4,
+            "is_featured": True,
+            "is_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         },
         {
@@ -315,6 +323,10 @@ async def seed_data():
             ],
             "status": "active",
             "seller_email": "student@example.com",
+            "seller_name": "EduTech Developers",
+            "seller_products": 2,
+            "is_featured": False,
+            "is_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         },
         {
@@ -341,6 +353,10 @@ async def seed_data():
             ],
             "status": "active",
             "seller_email": "business@example.com",
+            "seller_name": "Enterprise AI Labs",
+            "seller_products": 5,
+            "is_featured": False,
+            "is_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
     ]
