@@ -302,6 +302,61 @@ async def get_purchases():
     
     return purchases
 
+@api_router.post("/projects", response_model=ProjectRequest)
+async def create_project_request(project_data: ProjectRequestCreate):
+    project = ProjectRequest(**project_data.model_dump())
+    doc = project.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    
+    await db.project_requests.insert_one(doc)
+    return project
+
+@api_router.get("/projects", response_model=List[ProjectRequest])
+async def get_projects(budget: Optional[str] = None, website_type: Optional[str] = None):
+    query = {"status": "active"}
+    if budget:
+        query["budget_range"] = budget
+    if website_type:
+        query["website_type"] = website_type
+    
+    projects = await db.project_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    for project in projects:
+        if isinstance(project.get('created_at'), str):
+            project['created_at'] = datetime.fromisoformat(project['created_at'])
+    
+    return projects
+
+@api_router.get("/projects/{project_id}", response_model=ProjectRequest)
+async def get_project(project_id: str):
+    project = await db.project_requests.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    if isinstance(project.get('created_at'), str):
+        project['created_at'] = datetime.fromisoformat(project['created_at'])
+    
+    return project
+
+@api_router.post("/proposals", response_model=Proposal)
+async def create_proposal(proposal_data: ProposalCreate):
+    proposal = Proposal(**proposal_data.model_dump())
+    doc = proposal.model_dump()
+    doc['submitted_at'] = doc['submitted_at'].isoformat()
+    
+    await db.proposals.insert_one(doc)
+    return proposal
+
+@api_router.get("/projects/{project_id}/proposals", response_model=List[Proposal])
+async def get_project_proposals(project_id: str):
+    proposals = await db.proposals.find({"project_id": project_id}, {"_id": 0}).sort("submitted_at", -1).to_list(1000)
+    
+    for proposal in proposals:
+        if isinstance(proposal.get('submitted_at'), str):
+            proposal['submitted_at'] = datetime.fromisoformat(proposal['submitted_at'])
+    
+    return proposals
+
 @api_router.get("/seed")
 async def seed_data():
     # Clear existing data
