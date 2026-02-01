@@ -161,7 +161,8 @@ export const AdminPage = () => {
           </TabsList>
 
           <TabsContent value="submissions">
-          <CardContent className="p-6">
+            <Card>
+              <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Submissions</h2>
               <Select value={filter} onValueChange={setFilter}>
