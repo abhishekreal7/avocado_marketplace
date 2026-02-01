@@ -1,16 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Rocket, Menu, X } from 'lucide-react';
+import { Rocket, Menu, X, DollarSign, IndianRupee } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/hooks/useCurrency';
 
 export const Navbar = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { currency, setCurrency } = useCurrency();
 
   const isActive = (path) => location.pathname === path;
 
+  const toggleCurrency = () => {
+    setCurrency(currency === 'USD' ? 'INR' : 'USD');
+  };
+
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center gap-2 group">
@@ -48,6 +54,26 @@ export const Navbar = () => {
             >
               Sell Your Website
             </Link>
+
+            {/* Currency Toggle */}
+            <button
+              onClick={toggleCurrency}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border-2 border-gray-200 hover:border-avocado-dark transition-colors bg-white"
+              data-testid="currency-toggle"
+            >
+              {currency === 'USD' ? (
+                <>
+                  <DollarSign className="w-4 h-4 text-avocado-dark" />
+                  <span className="text-sm font-medium text-gray-700">USD</span>
+                </>
+              ) : (
+                <>
+                  <IndianRupee className="w-4 h-4 text-avocado-dark" />
+                  <span className="text-sm font-medium text-gray-700">INR</span>
+                </>
+              )}
+            </button>
+
             <Link to="/admin" data-testid="nav-admin">
               <Button
                 variant="outline"
@@ -93,6 +119,12 @@ export const Navbar = () => {
             >
               Sell Your Website
             </Link>
+            <button
+              onClick={toggleCurrency}
+              className="flex items-center gap-2 text-sm font-medium text-gray-600"
+            >
+              {currency === 'USD' ? '$ USD' : '₹ INR'}
+            </button>
             <Link
               to="/admin"
               className="block text-sm font-medium text-gray-600 hover:text-avocado-forest"
