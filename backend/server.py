@@ -192,6 +192,20 @@ async def create_listing(listing_data: ListingCreate):
     await db.listings.insert_one(doc)
     return listing
 
+@api_router.put("/admin/listings/{listing_id}/feature")
+async def toggle_featured(listing_id: str):
+    listing = await db.listings.find_one({"id": listing_id}, {"_id": 0})
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+    
+    new_featured_status = not listing.get('is_featured', False)
+    await db.listings.update_one(
+        {"id": listing_id},
+        {"$set": {"is_featured": new_featured_status}}
+    )
+    
+    return {"message": "Featured status updated", "is_featured": new_featured_status}
+
 @api_router.get("/seed")
 async def seed_data():
     existing_count = await db.listings.count_documents({})
