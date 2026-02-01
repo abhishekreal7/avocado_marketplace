@@ -125,10 +125,12 @@ code {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #0F392B 0%, #1A5C43 100%);
+    background: linear-gradient(135deg, #0F392B 0%, #1A5C43 50%, #2F5233 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    font-weight: 600;
+    letter-spacing: -0.022em;
 }
 
 .hover-lift {
