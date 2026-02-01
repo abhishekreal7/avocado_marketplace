@@ -10,22 +10,24 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export const ListingDetailPage = () => {
-  const { id } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currency, setCurrency] = useState('USD');
   const [loading, setLoading] = useState(true);
+  
+  const listingId = params.id;
 
   useEffect(() => {
     const userLocale = navigator.language || navigator.userLanguage;
-    if (userLocale.toLowerCase().includes('in')) {
+    if (userLocale && userLocale.toLowerCase().includes('in')) {
       setCurrency('INR');
     }
 
-    const fetchListing = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/listings/${id}`);
+        const response = await axios.get(`${API}/listings/${listingId}`);
         setListing(response.data);
       } catch (error) {
         console.error('Error fetching listing:', error);
@@ -34,10 +36,12 @@ export const ListingDetailPage = () => {
       }
     };
 
-    fetchListing();
-  }, [id]);
+    if (listingId) {
+      fetchData();
+    }
+  }, [listingId]);
 
-  const formatPrice = () => {
+  const getFormattedPrice = () => {
     if (!listing) return '';
     if (currency === 'INR') {
       return `₹${listing.price_inr.toLocaleString()}`;
@@ -66,6 +70,10 @@ export const ListingDetailPage = () => {
     );
   }
 
+  const imageList = listing.images || [];
+  const featureList = listing.features || [];
+  const techList = listing.tech_stack || [];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -80,16 +88,18 @@ export const ListingDetailPage = () => {
           <div className="lg:col-span-2">
             <Card className="overflow-hidden mb-6">
               <div className="relative h-96 bg-gray-200">
-                <img
-                  src={listing.images[currentImageIndex]}
-                  alt={listing.title}
-                  className="w-full h-full object-cover"
-                  data-testid="listing-image"
-                />
+                {imageList.length > 0 && (
+                  <img
+                    src={imageList[currentImageIndex]}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                    data-testid="listing-image"
+                  />
+                )}
               </div>
-              {listing.images.length > 1 && (
+              {imageList.length > 1 && (
                 <div className="flex gap-2 p-4 overflow-x-auto">
-                  {listing.images.map((image, index) => (
+                  {imageList.map((image, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
@@ -116,7 +126,7 @@ export const ListingDetailPage = () => {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4">Features</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {listing.features.map((feature, index) => (
+                  {featureList.map((feature, index) => (
                     <div key={index} className="flex items-start gap-2" data-testid={`feature-${index}`}>
                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700">{feature}</span>
@@ -130,7 +140,7 @@ export const ListingDetailPage = () => {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4">Tech Stack</h2>
                 <div className="flex flex-wrap gap-2">
-                  {listing.tech_stack.map((tech, index) => (
+                  {techList.map((tech, index) => (
                     <Badge
                       key={index}
                       variant="secondary"
@@ -156,7 +166,7 @@ export const ListingDetailPage = () => {
                 </div>
                 <h1 className="text-3xl font-bold mb-4" data-testid="listing-title">{listing.title}</h1>
                 <div className="text-4xl font-bold text-avocado-dark mb-6" data-testid="listing-price">
-                  {formatPrice()}
+                  {getFormattedPrice()}
                 </div>
 
                 <div className="space-y-3 mb-6">
