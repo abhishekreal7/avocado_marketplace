@@ -287,8 +287,21 @@ export const PremiumHomePage = () => {
         className="py-32 bg-white relative overflow-hidden" 
         data-testid="featured-listings-section"
       >
-        {/* Decorative gradient */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+        {/* Decorative gradient divider with glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-avocado-forest/30 to-transparent blur-sm" />
+        </div>
+        
+        {/* Ambient light effect */}
+        <motion.div
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-avocado-light/5 to-transparent rounded-full blur-3xl pointer-events-none"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3]
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
         
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
