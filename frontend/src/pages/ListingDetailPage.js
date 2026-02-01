@@ -155,14 +155,14 @@ export const ListingDetailPage = () => {
                 </div>
                 <h1 className="text-3xl font-bold mb-4" data-testid="listing-title">{listing.title}</h1>
                 <div className="text-4xl font-bold text-avocado-dark mb-6" data-testid="listing-price">
-                  {getFormattedPrice()}
+                  {formatPrice(listing.price_usd)}
                 </div>
 
                 <div className="space-y-3 mb-6">
                   <Button
                     size="lg"
                     className="w-full bg-avocado-dark hover:bg-avocado-forest text-avocado-light"
-                    onClick={() => navigate(`/checkout/${listing.id}`)}
+                    onClick={() => setShowPurchaseModal(true)}
                     data-testid="buy-now-button"
                   >
                     Buy Now
