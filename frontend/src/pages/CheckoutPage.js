@@ -20,6 +20,17 @@ export const CheckoutPage = () => {
       setCurrency('INR');
     }
 
+    const fetchListing = async () => {
+      try {
+        const response = await axios.get(`${API}/listings/${id}`);
+        setListing(response.data);
+      } catch (error) {
+        console.error('Error fetching listing:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchListing();
   }, [id]);
 
