@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, CheckCircle, Code } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PurchaseModal } from '@/components/PurchaseModal';
 import axios from 'axios';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 export const ListingDetailPage = () => {
   const params = useParams();
-  const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currency, setCurrency] = useState('USD');
   const [loading, setLoading] = useState(true);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const { formatPrice } = useCurrency();
   
   const listingId = params.id;
 
