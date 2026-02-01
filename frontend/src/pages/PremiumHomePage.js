@@ -51,11 +51,26 @@ export const PremiumHomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section with Parallax */}
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      {/* Floating Brand Orb - Signature Element */}
+      <FloatingAvocadoOrb />
+
+      {/* Ambient gradient overlay that shifts with scroll */}
+      <motion.div 
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{ opacity: backgroundOpacity }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-avocado-mint/5 via-transparent to-avocado-forest/5" />
+      </motion.div>
+
+      {/* Hero Section with Enhanced Parallax */}
       <motion.section 
-        className="relative pt-32 pb-40 overflow-hidden bg-gradient-to-b from-white via-gray-50/30 to-white" 
-        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="relative pt-32 pb-40 overflow-hidden" 
+        style={{ 
+          opacity: heroOpacity, 
+          scale: heroScale,
+          y: heroY
+        }}
         data-testid="hero-section"
       >
         {/* Animated background orbs */}
