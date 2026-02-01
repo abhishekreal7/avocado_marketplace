@@ -160,7 +160,7 @@ export const MarketplacePage = () => {
                   <h3 className="font-bold text-xl mb-2">{listing.title}</h3>
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">{listing.description}</p>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-2xl font-bold text-avocado-dark">{formatPrice(listing)}</span>
+                    <span className="text-2xl font-bold text-avocado-dark">{formatPrice(listing.price_usd)}</span>
                     <Link to={`/listing/${listing.id}`}>
                       <Button
                         size="sm"
