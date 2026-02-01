@@ -39,6 +39,12 @@ code {
         --input: 156 30% 88%;
         --ring: 156 72% 15%;
         --radius: 0.5rem;
+        
+        /* iOS-inspired spacing */
+        --spacing-tight: 0.25rem;
+        --spacing-base: 0.5rem;
+        --spacing-comfortable: 1rem;
+        --spacing-relaxed: 1.5rem;
     }
 }
 
@@ -47,10 +53,42 @@ code {
         @apply border-border;
     }
     body {
-        @apply bg-background text-foreground font-body;
+        @apply bg-background text-foreground;
+        font-feature-settings: 'liga' 1, 'calt' 1;
+        letter-spacing: -0.011em;
     }
-    h1, h2, h3, h4, h5, h6 {
-        @apply font-heading;
+    
+    /* iOS-style heading hierarchy */
+    h1 {
+        font-weight: 700;
+        letter-spacing: -0.022em;
+        line-height: 1.1;
+    }
+    h2 {
+        font-weight: 600;
+        letter-spacing: -0.019em;
+        line-height: 1.2;
+    }
+    h3 {
+        font-weight: 600;
+        letter-spacing: -0.016em;
+        line-height: 1.25;
+    }
+    h4, h5, h6 {
+        font-weight: 600;
+        letter-spacing: -0.011em;
+    }
+    
+    /* iOS-style body text */
+    p {
+        letter-spacing: -0.011em;
+        line-height: 1.5;
+    }
+    
+    /* iOS-style buttons */
+    button {
+        font-weight: 500;
+        letter-spacing: -0.011em;
     }
 }
 
