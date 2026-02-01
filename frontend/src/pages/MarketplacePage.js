@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import axios from 'axios';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -30,8 +31,8 @@ export const MarketplacePage = () => {
   const [filteredListings, setFilteredListings] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currency, setCurrency] = useState('USD');
   const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     const userLocale = navigator.language || navigator.userLanguage;
