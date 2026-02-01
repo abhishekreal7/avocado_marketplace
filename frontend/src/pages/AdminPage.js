@@ -23,6 +23,18 @@ export const AdminPage = () => {
   const [filter, setFilter] = useState('pending');
 
   useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const response = await axios.get(`${API}/admin/submissions`);
+        setSubmissions(response.data);
+      } catch (error) {
+        console.error('Error fetching submissions:', error);
+        toast.error('Failed to fetch submissions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchSubmissions();
   }, []);
 
