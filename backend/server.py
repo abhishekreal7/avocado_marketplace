@@ -65,6 +65,10 @@ class ListingCreate(BaseModel):
     demo_url: str
     images: List[str]
     seller_email: str
+    seller_name: str = "Avocado Creator"
+    seller_products: int = 1
+    is_featured: bool = False
+    is_verified: bool = True
 
 class Submission(BaseModel):
     model_config = ConfigDict(extra="ignore")
