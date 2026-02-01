@@ -22,11 +22,6 @@ export const ListingDetailPage = () => {
   const listingId = params.id;
 
   useEffect(() => {
-    const userLocale = navigator.language || navigator.userLanguage;
-    if (userLocale && userLocale.toLowerCase().includes('in')) {
-      setCurrency('INR');
-    }
-
     const fetchData = async () => {
       try {
         const response = await axios.get(`${API}/listings/${listingId}`);
@@ -42,14 +37,6 @@ export const ListingDetailPage = () => {
       fetchData();
     }
   }, [listingId]);
-
-  const getFormattedPrice = () => {
-    if (!listing) return '';
-    if (currency === 'INR') {
-      return `₹${listing.price_inr.toLocaleString()}`;
-    }
-    return `$${listing.price_usd}`;
-  };
 
   if (loading) {
     return (
