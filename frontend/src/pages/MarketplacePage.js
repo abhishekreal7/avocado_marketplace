@@ -76,36 +76,6 @@ export const MarketplacePage = () => {
     filterListings();
   }, [listings, selectedCategory, searchQuery]);
 
-  const fetchListings = async () => {
-    try {
-      const response = await axios.get(`${API}/listings`);
-      setListings(response.data);
-      setFilteredListings(response.data);
-    } catch (error) {
-      console.error('Error fetching listings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterListings = () => {
-    let filtered = listings;
-
-    if (selectedCategory !== 'All') {
-      filtered = filtered.filter((listing) => listing.category === selectedCategory);
-    }
-
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (listing) =>
-          listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          listing.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    setFilteredListings(filtered);
-  };
-
   const formatPrice = (listing) => {
     if (currency === 'INR') {
       return `₹${listing.price_inr.toLocaleString()}`;
