@@ -35,11 +35,6 @@ export const MarketplacePage = () => {
   const { formatPrice } = useCurrency();
 
   useEffect(() => {
-    const userLocale = navigator.language || navigator.userLanguage;
-    if (userLocale.toLowerCase().includes('in')) {
-      setCurrency('INR');
-    }
-
     const fetchListings = async () => {
       try {
         const response = await axios.get(`${API}/listings`);
