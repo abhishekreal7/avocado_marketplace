@@ -9,23 +9,26 @@ import { SellPage } from "@/pages/SellPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { AdminPage } from "@/pages/AdminPage";
 import { Toaster } from "@/components/ui/sonner";
+import { CurrencyProvider } from "@/hooks/useCurrency";
 
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/marketplace" element={<MarketplacePage />} />
-          <Route path="/listing/:id" element={<ListingDetailPage />} />
-          <Route path="/sell" element={<SellPage />} />
-          <Route path="/checkout/:id" element={<CheckoutPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-        </Routes>
-        <Footer />
-        <Toaster position="top-right" />
-      </BrowserRouter>
+      <CurrencyProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/listing/:id" element={<ListingDetailPage />} />
+            <Route path="/sell" element={<SellPage />} />
+            <Route path="/checkout/:id" element={<CheckoutPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+          </Routes>
+          <Footer />
+          <Toaster position="top-right" />
+        </BrowserRouter>
+      </CurrencyProvider>
     </div>
   );
 }
