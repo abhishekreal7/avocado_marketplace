@@ -48,6 +48,10 @@ class Listing(BaseModel):
     images: List[str]
     status: StatusEnum = StatusEnum.ACTIVE
     seller_email: str
+    seller_name: str = "Avocado Creator"
+    seller_products: int = 1
+    is_featured: bool = False
+    is_verified: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ListingCreate(BaseModel):
