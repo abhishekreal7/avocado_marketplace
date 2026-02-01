@@ -251,13 +251,28 @@ export const PremiumHomePage = () => {
                 key={i}
                 className="text-center"
                 variants={fadeInUp}
+                whileHover={{ 
+                  scale: 1.05,
+                  transition: { type: "spring", stiffness: 400, damping: 10 }
+                }}
               >
                 <motion.div
-                  className="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-4 shadow-sm"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-4 shadow-sm relative overflow-hidden group"
+                  whileHover={{ 
+                    scale: 1.15, 
+                    rotate: [0, -5, 5, 0],
+                    boxShadow: "0 10px 30px rgba(15, 57, 43, 0.15)"
+                  }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <stat.icon className="w-8 h-8 text-avocado-forest" />
+                  {/* Animated background on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-avocado-light/20 to-avocado-forest/20"
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileHover={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  <stat.icon className="w-8 h-8 text-avocado-forest relative z-10" />
                 </motion.div>
                 <h3 className="text-4xl font-bold text-gray-900 mb-2">{stat.number}</h3>
                 <p className="text-gray-600">{stat.label}</p>
