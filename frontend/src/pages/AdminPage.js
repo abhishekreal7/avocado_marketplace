@@ -129,32 +129,38 @@ export const AdminPage = () => {
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-approved">
+          <Card data-testid="stat-purchases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Approved</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
+                  <p className="text-sm text-gray-600">Total Purchases</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.purchases}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-rejected">
+          <Card data-testid="stat-revenue">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Rejected</p>
-                  <p className="text-3xl font-bold text-red-600">{stats.rejected}</p>
+                  <p className="text-sm text-gray-600">Revenue</p>
+                  <p className="text-3xl font-bold text-avocado-dark">${stats.revenue.toFixed(0)}</p>
                 </div>
-                <XCircle className="w-8 h-8 text-red-400" />
+                <DollarSign className="w-8 h-8 text-avocado-forest" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Card>
+        <Tabs defaultValue="submissions" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            <TabsTrigger value="purchases">Purchases</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="submissions">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Submissions</h2>
