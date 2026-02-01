@@ -1,0 +1,64 @@
+{
+  "summary": {
+    "total_tests": 9,
+    "passed_tests": 9,
+    "success_rate": "100.0%",
+    "timestamp": "2026-02-01T10:39:23.233847"
+  },
+  "test_results": [
+    {
+      "test": "API Root",
+      "success": true,
+      "details": "Status: 200, Response: {'message': 'Avocado Marketplace API'}",
+      "timestamp": "2026-02-01T10:39:22.883775"
+    },
+    {
+      "test": "Database Seeding",
+      "success": true,
+      "details": "Status: 200, Response: {'message': 'Database already seeded'}",
+      "timestamp": "2026-02-01T10:39:22.926681"
+    },
+    {
+      "test": "GET Listings",
+      "success": true,
+      "details": "Status: 200, Found 5 listings (Expected sample data present), Sample ID: 862d60ca-e3de-47b0-8c8d-dd64c2bcf86a",
+      "timestamp": "2026-02-01T10:39:22.963399"
+    },
+    {
+      "test": "GET Listing Detail",
+      "success": true,
+      "details": "Status: 200, Title: AI Resume Builder Pro, Price USD: $129.0, Price INR: \u20b99999.0",
+      "timestamp": "2026-02-01T10:39:23.002690"
+    },
+    {
+      "test": "Search Listings",
+      "success": true,
+      "details": "Search Status: 200, Found 5 results for 'AI'",
+      "timestamp": "2026-02-01T10:39:23.038015"
+    },
+    {
+      "test": "Filter by Category",
+      "success": true,
+      "details": "Filter Status: 200, Found 1 Marketing listings",
+      "timestamp": "2026-02-01T10:39:23.073564"
+    },
+    {
+      "test": "Create Submission",
+      "success": true,
+      "details": "Status: 200, Created submission ID: b6318ebb-61a1-4c3b-be0f-0fb280346006, Status: pending",
+      "timestamp": "2026-02-01T10:39:23.121171"
+    },
+    {
+      "test": "GET Admin Submissions",
+      "success": true,
+      "details": "Status: 200, Found 1 submissions, Test submission found: True",
+      "timestamp": "2026-02-01T10:39:23.193553"
+    },
+    {
+      "test": "Update Submission Status",
+      "success": true,
+      "details": "Status: 200, Updated status: approved, Reviewed at: 2026-02-01T10:39:23.228794Z",
+      "timestamp": "2026-02-01T10:39:23.233159"
+    }
+  ]
+}
