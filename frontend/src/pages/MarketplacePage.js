@@ -72,12 +72,7 @@ export const MarketplacePage = () => {
     filterListings();
   }, [listings, selectedCategory, searchQuery]);
 
-  const formatPrice = (listing) => {
-    if (currency === 'INR') {
-      return `₹${listing.price_inr.toLocaleString()}`;
-    }
-    return `$${listing.price_usd}`;
-  };
+ 
 
   return (
     <div className="min-h-screen bg-gray-50">
