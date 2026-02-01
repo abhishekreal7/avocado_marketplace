@@ -49,6 +49,52 @@ class PurchaseCreate(BaseModel):
     listing_id: str
     currency: str = "USD"
 
+class ProjectRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_name: str
+    client_email: EmailStr
+    project_title: str
+    website_type: str
+    budget_range: str
+    deadline: str
+    description: str
+    reference_link: Optional[str] = None
+    status: str = "active"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ProjectRequestCreate(BaseModel):
+    client_name: str
+    client_email: EmailStr
+    project_title: str
+    website_type: str
+    budget_range: str
+    deadline: str
+    description: str
+    reference_link: Optional[str] = None
+
+class Proposal(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    project_id: str
+    provider_name: str
+    provider_email: EmailStr
+    proposed_price: float
+    timeline: str
+    message: str
+    portfolio_link: Optional[str] = None
+    status: str = "pending"
+    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ProposalCreate(BaseModel):
+    project_id: str
+    provider_name: str
+    provider_email: EmailStr
+    proposed_price: float
+    timeline: str
+    message: str
+    portfolio_link: Optional[str] = None
+
 class Listing(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
