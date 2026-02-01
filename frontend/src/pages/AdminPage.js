@@ -276,57 +276,6 @@ export const AdminPage = () => {
 
           <TabsContent value="purchases">
             <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Recent Purchases</h2>
-                
-                {loading ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">Loading purchases...</p>
-                  </div>
-                ) : purchases.length === 0 ? (
-                  <div className="text-center py-12" data-testid="no-purchases">
-                    <p className="text-gray-500">No purchases yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4" data-testid="purchases-list">
-                    {purchases.map((purchase) => (
-                      <Card key={purchase.id} className="border-2" data-testid={`purchase-${purchase.id}`}>
-                        <CardContent className="p-6">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-lg mb-1" data-testid={`purchase-title-${purchase.id}`}>
-                                {purchase.listing_title}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-2">
-                                Buyer: {purchase.buyer_email}
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {purchase.currency === 'USD' ? '$' : '₹'}{purchase.price_paid}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {new Date(purchase.purchase_date).toLocaleDateString()}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-green-100 text-green-800">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Completed
-                              </Badge>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <Card className="mt-8">
           <CardContent className="p-6">
             <h3 className="font-semibold text-lg mb-2">Review Process</h3>
             <p className="text-sm text-gray-600">
