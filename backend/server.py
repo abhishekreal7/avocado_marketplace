@@ -34,6 +34,21 @@ class StatusEnum(str, Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
 
+class Purchase(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    buyer_email: EmailStr
+    listing_id: str
+    listing_title: str
+    price_paid: float
+    currency: str
+    purchase_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PurchaseCreate(BaseModel):
+    buyer_email: EmailStr
+    listing_id: str
+    currency: str = "USD"
+
 class Listing(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
