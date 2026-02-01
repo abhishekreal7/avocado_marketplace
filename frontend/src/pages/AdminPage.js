@@ -40,15 +40,10 @@ export const AdminPage = () => {
 
   const updateSubmissionStatus = async (id, status) => {
     try {
-      const response = await axios.get(`${API}/admin/submissions`);
       await axios.put(`${API}/admin/submissions/${id}`, { status });
       toast.success(`Submission ${status}!`);
+      const response = await axios.get(`${API}/admin/submissions`);
       setSubmissions(response.data);
-    } catch (error) {
-      console.error('Error updating submission:', error);
-      toast.error('Failed to update submission');
-    }
-  };
     } catch (error) {
       console.error('Error updating submission:', error);
       toast.error('Failed to update submission');
