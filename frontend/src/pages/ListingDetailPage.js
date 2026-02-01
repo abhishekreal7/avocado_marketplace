@@ -211,6 +211,15 @@ export const ListingDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Purchase Modal */}
+      {listing && (
+        <PurchaseModal
+          listing={listing}
+          isOpen={showPurchaseModal}
+          onClose={() => setShowPurchaseModal(false)}
+        />
+      )}
     </div>
   );
 };
