@@ -208,9 +208,8 @@ async def toggle_featured(listing_id: str):
 
 @api_router.get("/seed")
 async def seed_data():
-    existing_count = await db.listings.count_documents({})
-    if existing_count > 0:
-        return {"message": "Database already seeded"}
+    # Clear existing data
+    await db.listings.delete_many({})
     
     sample_listings = [
         {
