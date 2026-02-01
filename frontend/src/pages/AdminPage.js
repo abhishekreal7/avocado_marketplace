@@ -90,6 +90,8 @@ export const AdminPage = () => {
     pending: submissions.filter((s) => s.status === 'pending').length,
     approved: submissions.filter((s) => s.status === 'approved').length,
     rejected: submissions.filter((s) => s.status === 'rejected').length,
+    purchases: purchases.length,
+    revenue: purchases.reduce((sum, p) => sum + p.price_paid, 0)
   };
 
   return (
