@@ -1,163 +1,83 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Query
-from dotenv import load_dotenv
+from fastapi import FastAPI, APIRouter, HTTPException, Query, Depends
+from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from starlette.middleware.cors import CORSMiddleware
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
-import uuid
 from datetime import datetime, timezone
-from enum import Enum
+import uuid
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# Import shared database
+from database import db, client
 
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Import models
+from backend_models_user import User
+from backend_models_order_review import (
+    Listing, ListingCreate, ProjectRequest, ProjectRequestCreate, 
+    Proposal, ProposalCreate, CategoryEnum, StatusEnum
+)
+
+# Import routers
+from backend_auth_routes import router as auth_router
+from backend_orders_reviews import router as orders_reviews_router
+from backend_auth_service import get_current_user
+from fastapi import Depends
+
+from fastapi.staticfiles import StaticFiles
+
+# Create uploads directory if not exists
+UPLOAD_DIR = "uploads"
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
 
 app = FastAPI()
+
+# Mount static files
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
 api_router = APIRouter(prefix="/api")
 
-class CategoryEnum(str, Enum):
-    MARKETING = "Marketing"
-    REAL_ESTATE = "Real Estate"
-    STUDENT_TOOLS = "Student Tools"
-    BUSINESS_TOOLS = "Business Tools"
-    PRODUCTIVITY = "Productivity"
+# CORS Configuration
+cors_origins_str = os.environ.get("CORS_ORIGINS", "http://localhost:3000")
+origins = [origin.strip() for origin in cors_origins_str.split(",")]
 
-class StatusEnum(str, Enum):
-    ACTIVE = "active"
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-class Purchase(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    buyer_email: EmailStr
-    listing_id: str
-    listing_title: str
-    price_paid: float
-    currency: str
-    purchase_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+from backend_newsletter import router as newsletter_router
+from backend_notifications import router as notifications_router
+from backend_analytics import router as analytics_router
+from backend_chat import router as chat_router
+from backend_admin_analytics import router as admin_analytics_router
+from backend_webhooks import router as webhooks_router
 
-class PurchaseCreate(BaseModel):
-    buyer_email: EmailStr
-    listing_id: str
-    currency: str = "USD"
+# Include Auth and Order/Review routers
+api_router.include_router(auth_router)
+api_router.include_router(orders_reviews_router)
+api_router.include_router(newsletter_router)
+api_router.include_router(notifications_router)
+api_router.include_router(analytics_router)
+api_router.include_router(chat_router)
+api_router.include_router(admin_analytics_router)
+api_router.include_router(webhooks_router, prefix="/webhooks", tags=["webhooks"])
 
-class ProjectRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    client_email: EmailStr
-    project_title: str
-    website_type: str
-    budget_range: str
-    deadline: str
-    description: str
-    reference_link: Optional[str] = None
-    status: str = "active"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-class ProjectRequestCreate(BaseModel):
-    client_name: str
-    client_email: EmailStr
-    project_title: str
-    website_type: str
-    budget_range: str
-    deadline: str
-    description: str
-    reference_link: Optional[str] = None
-
-class Proposal(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    project_id: str
-    provider_name: str
-    provider_email: EmailStr
-    proposed_price: float
-    timeline: str
-    message: str
-    portfolio_link: Optional[str] = None
-    status: str = "pending"
-    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class ProposalCreate(BaseModel):
-    project_id: str
-    provider_name: str
-    provider_email: EmailStr
-    proposed_price: float
-    timeline: str
-    message: str
-    portfolio_link: Optional[str] = None
-
-class Listing(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    price_usd: float
-    price_inr: float
-    description: str
-    category: CategoryEnum
-    features: List[str]
-    tech_stack: List[str]
-    demo_url: str
-    images: List[str]
-    status: StatusEnum = StatusEnum.ACTIVE
-    seller_email: str
-    seller_name: str = "Avocado Creator"
-    seller_products: int = 1
-    is_featured: bool = False
-    is_verified: bool = True
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class ListingCreate(BaseModel):
-    title: str
-    price_usd: float
-    price_inr: float
-    description: str
-    category: CategoryEnum
-    features: List[str]
-    tech_stack: List[str]
-    demo_url: str
-    images: List[str]
-    seller_email: str
-    seller_name: str = "Avocado Creator"
-    seller_products: int = 1
-    is_featured: bool = False
-    is_verified: bool = True
-
-class Submission(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    full_name: str
-    email: EmailStr
-    website_title: str
-    category: CategoryEnum
-    price: float
-    description: str
-    demo_url: str
-    upload_link: str
-    status: StatusEnum = StatusEnum.PENDING
-    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    reviewed_at: Optional[datetime] = None
-
-class SubmissionCreate(BaseModel):
-    full_name: str
-    email: EmailStr
-    website_title: str
-    category: CategoryEnum
-    price: float
-    description: str
-    demo_url: str
-    upload_link: str
-
-class SubmissionUpdate(BaseModel):
-    status: StatusEnum
+# --- Remaining Endpoints (Listings, Projects, Seed) ---
 
 @api_router.get("/")
 async def root():
@@ -174,12 +94,30 @@ async def get_listings(category: Optional[str] = None, search: Optional[str] = N
             {"description": {"$regex": search, "$options": "i"}}
         ]
     
-    listings = await db.listings.find(query, {"_id": 0}).to_list(1000)
+    listings = await db.listings.find(query, {"_id": 0}).sort([("is_featured", -1), ("created_at", -1)]).to_list(1000)
+    
+    # Enrich with seller_id
+    for listing in listings:
+        if isinstance(listing.get('created_at'), str):
+            listing['created_at'] = datetime.fromisoformat(listing['created_at'])
+        
+        # Fetch seller_id if missing
+        if not listing.get('seller_id') and listing.get('seller_email'):
+            seller = await db.users.find_one({"email": listing['seller_email']}, {"id": 1})
+            if seller:
+                listing['seller_id'] = seller['id']
+    
+    return listings
+
+@api_router.get("/seller/listings", response_model=List[Listing])
+async def get_seller_listings(current_user: User = Depends(get_current_user)):
+    listings = await db.listings.find({"seller_email": current_user.email}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
     for listing in listings:
         if isinstance(listing.get('created_at'), str):
             listing['created_at'] = datetime.fromisoformat(listing['created_at'])
-    
+        listing['seller_id'] = current_user.id
+            
     return listings
 
 @api_router.get("/listings/{listing_id}", response_model=Listing)
@@ -191,64 +129,205 @@ async def get_listing(listing_id: str):
     if isinstance(listing.get('created_at'), str):
         listing['created_at'] = datetime.fromisoformat(listing['created_at'])
     
+    # Fetch seller_id
+    if not listing.get('seller_id') and listing.get('seller_email'):
+        seller = await db.users.find_one({"email": listing['seller_email']}, {"id": 1})
+        if seller:
+            listing['seller_id'] = seller['id']
+    
+    # If it's a bundle, we might want to fetch details of items in it.
+    # For now, we trust the frontend to fetch them if needed or we could enrich here.
+    # Let's keep it simple for MVP and just return the IDs in 'bundle_items'.
+    
     return listing
 
-@api_router.post("/submissions", response_model=Submission)
-async def create_submission(submission_data: SubmissionCreate):
-    submission = Submission(**submission_data.model_dump())
-    doc = submission.model_dump()
-    doc['submitted_at'] = doc['submitted_at'].isoformat()
-    doc['reviewed_at'] = None
+# Gamification / Rank Logic
+def calculate_seller_rank(total_sales: int, avg_rating: float) -> dict:
+    # Ranks:
+    # 1. Hello World (Start)
+    # 2. Junior Dev (1 Sale)
+    # 3. Senior Dev (10 Sales, 4.0+ Rating)
+    # 4. Tech Lead (50 Sales, 4.5+ Rating)
+    # 5. 10x Engineer (100 Sales, 4.8+ Rating)
     
-    await db.submissions.insert_one(doc)
-    return submission
+    if total_sales >= 100 and avg_rating >= 4.8:
+        return {"rank": "10x Engineer", "badge": "🚀", "next_rank": None, "progress": 100}
+    elif total_sales >= 50 and avg_rating >= 4.5:
+        return {"rank": "Tech Lead", "badge": "🌐", "next_rank": "10x Engineer", "progress": int((total_sales / 100) * 100)}
+    elif total_sales >= 10 and avg_rating >= 4.0:
+        return {"rank": "Senior Dev", "badge": "💻", "next_rank": "Tech Lead", "progress": int((total_sales / 50) * 100)}
+    elif total_sales >= 1:
+        return {"rank": "Junior Dev", "badge": "🐛", "next_rank": "Senior Dev", "progress": int((total_sales / 10) * 100)}
+    else:
+        return {"rank": "Hello World", "badge": "🖥️", "next_rank": "Junior Dev", "progress": int((total_sales / 1) * 100)} # 0/1
 
-@api_router.get("/admin/submissions", response_model=List[Submission])
-async def get_submissions(status: Optional[str] = None):
-    query = {}
-    if status:
-        query["status"] = status
-    
-    submissions = await db.submissions.find(query, {"_id": 0}).sort("submitted_at", -1).to_list(1000)
-    
-    for submission in submissions:
-        if isinstance(submission.get('submitted_at'), str):
-            submission['submitted_at'] = datetime.fromisoformat(submission['submitted_at'])
-        if submission.get('reviewed_at') and isinstance(submission['reviewed_at'], str):
-            submission['reviewed_at'] = datetime.fromisoformat(submission['reviewed_at'])
-    
-    return submissions
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    headline: Optional[str] = None
+    social_links: Optional[dict] = None
+    location: Optional[str] = None
+    languages: Optional[List[str]] = None
+    skills: Optional[List[str]] = None
+    country: Optional[str] = None
+    pincode: Optional[str] = None
 
-@api_router.put("/admin/submissions/{submission_id}", response_model=Submission)
-async def update_submission(submission_id: str, update_data: SubmissionUpdate):
-    submission = await db.submissions.find_one({"id": submission_id}, {"_id": 0})
-    if not submission:
-        raise HTTPException(status_code=404, detail="Submission not found")
+@api_router.get("/users/{user_id}/profile")
+async def get_user_profile(user_id: str):
+    # 1. Fetch User
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 0, "role": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     
-    update_dict = {
-        "status": update_data.status,
-        "reviewed_at": datetime.now(timezone.utc).isoformat()
+    user_internal = await db.users.find_one({"id": user_id})
+    user_email = user_internal["email"]
+
+    # 2. Fetch Active Listings
+    listings = await db.listings.find(
+        {"seller_email": user_email, "status": StatusEnum.ACTIVE}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    # 3. Calculate Stats
+    all_seller_listings = await db.listings.find(
+        {"seller_email": user_email},
+        {"id": 1}
+    ).to_list(None)
+    all_listing_ids = [l["id"] for l in all_seller_listings]
+    
+    total_sales = 0
+    if all_listing_ids:
+        total_sales = await db.purchases.count_documents({"listing_id": {"$in": all_listing_ids}})
+
+    # 4. Fetch Reviews & Rating
+    reviews = []
+    average_rating = 0.0
+    if all_listing_ids:
+        raw_reviews = await db.reviews.find(
+            {"listing_id": {"$in": all_listing_ids}},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(20)
+        
+        # Enrich reviews with Reviewer and Listing metadata
+        for r in raw_reviews:
+            reviewer = await db.users.find_one({"id": r["reviewer_id"]}, {"name": 1, "picture": 1, "created_at": 1, "_id": 0})
+            listing = await db.listings.find_one({"id": r["listing_id"]}, {"title": 1, "price": 1, "images": 1, "_id": 0})
+            
+            r["reviewer"] = reviewer
+            r["listing"] = listing
+            # Mock data for "Duration" or "Country" if not in DB yet
+            r["duration"] = "3 days" # Placeholder
+            
+            if isinstance(r.get('created_at'), str) == False and r.get('created_at'):
+                r['created_at'] = r['created_at'].isoformat()
+            
+        reviews = raw_reviews
+
+        pipeline = [
+            {"$match": {"listing_id": {"$in": all_listing_ids}}},
+            {"$group": {"_id": None, "avg_rating": {"$avg": "$rating"}}}
+        ]
+        rating_result = await db.reviews.aggregate(pipeline).to_list(1)
+        if rating_result:
+            average_rating = round(rating_result[0]["avg_rating"], 1)
+
+    # 5. Calculate Rank
+    gamification = calculate_seller_rank(total_sales, average_rating)
+
+    # Format dates and return
+    if isinstance(user.get('created_at'), str) == False and user.get('created_at'):
+        user['created_at'] = user['created_at'].isoformat()
+        
+    for l in listings:
+        if isinstance(l.get('created_at'), str) == False and l.get('created_at'):
+            l['created_at'] = l['created_at'].isoformat()
+
+    return {
+        "user": user,
+        "listings": listings,
+        "stats": {
+            "total_sales": total_sales,
+            "average_rating": average_rating,
+            "total_reviews": len(reviews),
+            "member_since": user.get('created_at')
+        },
+        "gamification": gamification,
+        "recent_reviews": reviews
     }
-    
-    await db.submissions.update_one(
-        {"id": submission_id},
-        {"$set": update_dict}
+
+@api_router.put("/users/profile")
+async def update_profile(profile_data: ProfileUpdate, current_user: User = Depends(get_current_user)):
+    update_data = {}
+    if profile_data.name: update_data["name"] = profile_data.name
+    if profile_data.bio is not None: update_data["bio"] = profile_data.bio
+    if profile_data.headline is not None: update_data["headline"] = profile_data.headline
+    if profile_data.social_links is not None: update_data["social_links"] = profile_data.social_links
+    if profile_data.location is not None: update_data["location"] = profile_data.location
+    if profile_data.languages is not None: update_data["languages"] = profile_data.languages
+    if profile_data.skills is not None: update_data["skills"] = profile_data.skills
+    if profile_data.country is not None: update_data["country"] = profile_data.country
+    if profile_data.pincode is not None: update_data["pincode"] = profile_data.pincode
+        
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+        
+    await db.users.update_one(
+        {"email": current_user.email},
+        {"$set": update_data}
     )
     
-    updated_submission = await db.submissions.find_one({"id": submission_id}, {"_id": 0})
-    
-    if isinstance(updated_submission.get('submitted_at'), str):
-        updated_submission['submitted_at'] = datetime.fromisoformat(updated_submission['submitted_at'])
-    if updated_submission.get('reviewed_at') and isinstance(updated_submission['reviewed_at'], str):
-        updated_submission['reviewed_at'] = datetime.fromisoformat(updated_submission['reviewed_at'])
-    
-    return updated_submission
+    updated_user = await db.users.find_one({"email": current_user.email}, {"_id": 0})
+    if isinstance(updated_user.get('created_at'), str) == False and updated_user.get('created_at'):
+        updated_user['created_at'] = updated_user['created_at'].isoformat()
 
-@api_router.post("/admin/listings", response_model=Listing)
-async def create_listing(listing_data: ListingCreate):
-    listing = Listing(**listing_data.model_dump())
+    return updated_user
+
+@api_router.post("/listings", response_model=Listing)
+async def create_listing(listing_data: ListingCreate, current_user: User = Depends(get_current_user)):
+    # Logic for Auto-Approval
+    initial_status = StatusEnum.PENDING
+    
+    # 1. Admin always approved
+    if current_user.role == "admin":
+        initial_status = StatusEnum.ACTIVE
+        
+    # 2. Trusted Sellers (hardcoded for now)
+    trusted_sellers = ["demo@example.com", "abhis@example.com"]
+    if current_user.email in trusted_sellers:
+        initial_status = StatusEnum.ACTIVE
+        
+    # 3. Sellers with previous approved listings
+    if initial_status == StatusEnum.PENDING:
+        existing_approved = await db.listings.count_documents({
+            "seller_email": current_user.email,
+            "status": StatusEnum.ACTIVE
+        })
+        if existing_approved > 0:
+            initial_status = StatusEnum.ACTIVE
+
+    # Bundle Validation
+    if listing_data.is_bundle:
+        if not listing_data.bundle_items:
+             raise HTTPException(status_code=400, detail="Bundles must contain at least one item.")
+        # Verify user owns all items in the bundle
+        count = await db.listings.count_documents({
+            "id": {"$in": listing_data.bundle_items},
+            "seller_email": current_user.email
+        })
+        if count != len(listing_data.bundle_items):
+             raise HTTPException(status_code=400, detail="Invalid bundle items. You must own all items.")
+
+    listing = Listing(
+        **listing_data.model_dump(),
+        seller_email=current_user.email,
+        seller_name=current_user.name,
+        status=initial_status
+    )
+    
     doc = listing.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    if doc.get('featured_until'):
+        doc['featured_until'] = doc['featured_until'].isoformat()
     
     await db.listings.insert_one(doc)
     return listing
@@ -267,40 +346,33 @@ async def toggle_featured(listing_id: str):
     
     return {"message": "Featured status updated", "is_featured": new_featured_status}
 
-@api_router.post("/purchases", response_model=Purchase)
-async def create_purchase(purchase_data: PurchaseCreate):
-    # Get listing details
-    listing = await db.listings.find_one({"id": purchase_data.listing_id}, {"_id": 0})
+@api_router.post("/listings/{listing_id}/promote")
+async def promote_listing(listing_id: str):
+    listing = await db.listings.find_one({"id": listing_id})
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found")
     
-    # Determine price based on currency
-    price_paid = listing['price_usd'] if purchase_data.currency == 'USD' else listing['price_inr']
+    # In a real app, verify payment here
+    featured_until = datetime.now(timezone.utc).isoformat() # Logic to add 7 days would go here
     
-    purchase = Purchase(
-        buyer_email=purchase_data.buyer_email,
-        listing_id=purchase_data.listing_id,
-        listing_title=listing['title'],
-        price_paid=price_paid,
-        currency=purchase_data.currency
+    await db.listings.update_one(
+        {"id": listing_id},
+        {"$set": {"is_featured": True, "featured_until": featured_until}}
     )
     
-    doc = purchase.model_dump()
-    doc['purchase_date'] = doc['purchase_date'].isoformat()
-    
-    await db.purchases.insert_one(doc)
-    
-    return purchase
+    return {"message": "Listing promoted successfully", "is_featured": True}
 
-@api_router.get("/admin/purchases", response_model=List[Purchase])
-async def get_purchases():
-    purchases = await db.purchases.find({}, {"_id": 0}).sort("purchase_date", -1).to_list(1000)
-    
-    for purchase in purchases:
-        if isinstance(purchase.get('purchase_date'), str):
-            purchase['purchase_date'] = datetime.fromisoformat(purchase['purchase_date'])
-    
-    return purchases
+@api_router.post("/listings/{listing_id}/view")
+async def increment_listing_view(listing_id: str):
+    result = await db.listings.update_one(
+        {"id": listing_id},
+        {"$inc": {"views": 1}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Listing not found")
+    return {"message": "View incremented"}
+
+# --- Projects & Proposals ---
 
 @api_router.post("/projects", response_model=ProjectRequest)
 async def create_project_request(project_data: ProjectRequestCreate):
@@ -359,177 +431,34 @@ async def get_project_proposals(project_id: str):
 
 @api_router.get("/seed")
 async def seed_data():
+    import json
+    import os
+    
     # Clear existing data
     await db.listings.delete_many({})
     
-    sample_listings = [
-        {
-            "id": str(uuid.uuid4()),
-            "title": "AI Resume Builder Pro",
-            "price_usd": 129,
-            "price_inr": 9999,
-            "description": "Complete AI-powered resume builder with professional templates, AI content generation, and PDF export. Includes landing page, authentication, and payment integration.",
-            "category": "Productivity",
-            "features": [
-                "AI-powered content suggestions",
-                "15+ professional templates",
-                "PDF export functionality",
-                "User authentication & profiles",
-                "Payment integration ready",
-                "Mobile responsive design"
-            ],
-            "tech_stack": ["React", "FastAPI", "MongoDB", "OpenAI GPT-4", "Tailwind CSS"],
-            "demo_url": "https://demo.resumebuilder.ai",
-            "images": [
-                "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800",
-                "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800"
-            ],
-            "status": "active",
-            "seller_email": "builder@example.com",
-            "seller_name": "TechBuilder Studio",
-            "seller_products": 3,
-            "is_featured": True,
-            "is_verified": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "AI Real Estate Description Generator",
-            "price_usd": 99,
-            "price_inr": 7499,
-            "description": "AI-powered tool that generates compelling property descriptions for real estate listings. Perfect for realtors and property managers.",
-            "category": "Real Estate",
-            "features": [
-                "AI-generated property descriptions",
-                "Multiple style options (luxury, family, modern)",
-                "Bulk description generation",
-                "Export to multiple formats",
-                "SEO-optimized content",
-                "User dashboard with history"
-            ],
-            "tech_stack": ["Next.js", "Python", "PostgreSQL", "Claude AI", "Stripe"],
-            "demo_url": "https://demo.realestate-ai.com",
-            "images": [
-                "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800",
-                "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800"
-            ],
-            "status": "active",
-            "seller_email": "realtor@example.com",
-            "seller_name": "PropTech Solutions",
-            "seller_products": 2,
-            "is_featured": False,
-            "is_verified": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "AI Instagram Caption Generator SaaS",
-            "price_usd": 79,
-            "price_inr": 5999,
-            "description": "Generate engaging Instagram captions with AI. Includes hashtag suggestions, emoji integration, and multiple tone options.",
-            "category": "Marketing",
-            "features": [
-                "AI caption generation",
-                "Smart hashtag suggestions",
-                "Multiple tone options",
-                "Save favorite captions",
-                "Subscription billing",
-                "Social media scheduler integration"
-            ],
-            "tech_stack": ["React", "Node.js", "MongoDB", "GPT-4", "Tailwind CSS"],
-            "demo_url": "https://demo.captiongenie.ai",
-            "images": [
-                "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800",
-                "https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=800"
-            ],
-            "status": "active",
-            "seller_email": "marketer@example.com",
-            "seller_name": "Digital Marketing Co",
-            "seller_products": 4,
-            "is_featured": True,
-            "is_verified": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "AI Study Notes Summarizer",
-            "price_usd": 89,
-            "price_inr": 6999,
-            "description": "AI-powered study assistant that converts long documents and lectures into concise, organized study notes. Perfect for students.",
-            "category": "Student Tools",
-            "features": [
-                "Document to notes conversion",
-                "YouTube lecture summarization",
-                "Flashcard generation",
-                "Quiz creation from notes",
-                "Organize by subject/course",
-                "Export to PDF/Markdown"
-            ],
-            "tech_stack": ["Vue.js", "FastAPI", "PostgreSQL", "OpenAI", "Bootstrap"],
-            "demo_url": "https://demo.studyai.app",
-            "images": [
-                "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800",
-                "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=800"
-            ],
-            "status": "active",
-            "seller_email": "student@example.com",
-            "seller_name": "EduTech Developers",
-            "seller_products": 2,
-            "is_featured": False,
-            "is_verified": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "AI Customer Support Chatbot Platform",
-            "price_usd": 169,
-            "price_inr": 12999,
-            "description": "Complete white-label AI chatbot platform for customer support. Train on your data, embed on any website, track conversations.",
-            "category": "Business Tools",
-            "features": [
-                "Custom AI training on your data",
-                "Widget embed code",
-                "Conversation analytics",
-                "Multi-language support",
-                "White-label branding",
-                "API access",
-                "Lead capture forms"
-            ],
-            "tech_stack": ["React", "Python", "MongoDB", "LangChain", "OpenAI", "WebSocket"],
-            "demo_url": "https://demo.supportbot.ai",
-            "images": [
-                "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800",
-                "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800"
-            ],
-            "status": "active",
-            "seller_email": "business@example.com",
-            "seller_name": "Enterprise AI Labs",
-            "seller_products": 5,
-            "is_featured": False,
-            "is_verified": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-    ]
+    # Load AI tools seed data from JSON file
+    seed_file = os.path.join(os.path.dirname(__file__), 'ai_tools_seed.json')
     
-    await db.listings.insert_many(sample_listings)
-    return {"message": f"Seeded {len(sample_listings)} sample listings"}
+    try:
+        with open(seed_file, 'r') as f:
+            sample_listings = json.load(f)
+        
+        await db.listings.insert_many(sample_listings)
+        return {"message": f"Seeded {len(sample_listings)} AI tools successfully"}
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Seed data file not found. Run generate_ai_tools_seed.py first.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error seeding data: {str(e)}")
 
 app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
